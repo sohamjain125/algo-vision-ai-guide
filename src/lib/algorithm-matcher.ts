@@ -5,6 +5,9 @@ import { bubbleSort } from '@/data/algorithms/bubble-sort';
 import { quickSort } from '@/data/algorithms/quick-sort';
 import { binarySearchTree } from '@/data/algorithms/binary-search-tree';
 import { breadthFirstSearch } from '@/data/algorithms/breadth-first-search';
+import { heapSort } from '@/data/algorithms/heap-sort';
+import { mergeSort } from '@/data/algorithms/merge-sort';
+import { linkedList } from '@/data/algorithms/linked-list';
 
 // All available algorithms
 const algorithms: Algorithm[] = [
@@ -12,7 +15,10 @@ const algorithms: Algorithm[] = [
   bubbleSort,
   quickSort,
   binarySearchTree,
-  breadthFirstSearch
+  breadthFirstSearch,
+  heapSort,
+  mergeSort,
+  linkedList
 ];
 
 // Keywords associated with each algorithm
@@ -21,7 +27,10 @@ const algorithmKeywords: Record<string, string[]> = {
   'bubble-sort': ['bubble sort', 'bubble', 'sorting', 'swap'],
   'quick-sort': ['quick sort', 'quicksort', 'partition', 'pivoting', 'divide and conquer'],
   'binary-search-tree': ['binary search tree', 'bst', 'tree', 'binary tree'],
-  'breadth-first-search': ['bfs', 'breadth first search', 'level order', 'graph traversal', 'breadth']
+  'breadth-first-search': ['bfs', 'breadth first search', 'level order', 'graph traversal', 'breadth'],
+  'heap-sort': ['heap sort', 'heapsort', 'heap', 'binary heap', 'max heap', 'priority queue'],
+  'merge-sort': ['merge sort', 'mergesort', 'merge', 'divide and conquer', 'stable sort'],
+  'linked-list': ['linked list', 'list', 'node', 'linked', 'singly linked', 'chain']
 };
 
 export function getAlgorithmByQuery(query: string): Algorithm | null {
