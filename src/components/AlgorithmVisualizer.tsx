@@ -4,7 +4,7 @@ import ArrayVisualizer from './visualizers/ArrayVisualizer';
 import TreeVisualizer from './visualizers/TreeVisualizer';
 import GraphVisualizer from './visualizers/GraphVisualizer';
 import { Algorithm, VisualizationStep } from '@/types/AlgorithmTypes';
-import { InfoCircle, AlertCircle } from 'lucide-react';
+import { Info, AlertCircle } from 'lucide-react';
 
 interface AlgorithmVisualizerProps {
   algorithm: Algorithm;
@@ -73,7 +73,7 @@ const AlgorithmVisualizer: React.FC<AlgorithmVisualizerProps> = ({
       {step.variables && Object.keys(step.variables).length > 0 && (
         <div className="w-full mb-6 glass p-6 rounded-xl">
           <div className="flex items-center mb-4">
-            <InfoCircle className="h-5 w-5 text-primary mr-2" />
+            <Info className="h-5 w-5 text-primary mr-2" />
             <h3 className="text-lg font-medium gradient-text">Variables</h3>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
