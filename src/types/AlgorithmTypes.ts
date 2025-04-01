@@ -59,3 +59,22 @@ export interface Message {
   role: 'user' | 'system';
   content: string;
 }
+
+// MongoDB related types
+export interface MongoDBConfig {
+  uri: string;
+  dbName: string;
+  collections: {
+    algorithms: string;
+    userHistory: string;
+  };
+}
+
+export interface UserHistory {
+  userId: string;
+  queries: {
+    text: string;
+    timestamp: Date;
+    algorithmId?: string;
+  }[];
+}
