@@ -4,13 +4,13 @@ import { ArrayElement } from '@/types/AlgorithmTypes';
 import { cn } from '@/lib/utils';
 
 interface ArrayVisualizerProps {
-  array: ArrayElement[];
+  elements: ArrayElement[];
   pointers?: {
     [key: string]: number;
   };
 }
 
-const ArrayVisualizer: React.FC<ArrayVisualizerProps> = ({ array, pointers = {} }) => {
+const ArrayVisualizer: React.FC<ArrayVisualizerProps> = ({ elements, pointers = {} }) => {
   const getColor = (state: string) => {
     switch (state) {
       case 'visited':
@@ -24,12 +24,12 @@ const ArrayVisualizer: React.FC<ArrayVisualizerProps> = ({ array, pointers = {} 
     }
   };
 
-  const maxValue = Math.max(...array.map(item => item.value), 10);
+  const maxValue = Math.max(...elements.map(item => item.value), 10);
   
   return (
     <div className="flex flex-col items-center w-full">
       <div className="flex justify-center items-end h-60 w-full mb-6">
-        {array.map((item, index) => {
+        {elements.map((item, index) => {
           const height = `${Math.max(15, (item.value / maxValue) * 100)}%`;
           
           return (
