@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,13 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon } from "lucide-react";
+import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon, BookOpen, Lightbulb, GraduationCap } from "lucide-react";
 import ChatMessage from '@/components/ChatMessage';
 import AlgorithmVisualizer from '@/components/AlgorithmVisualizer';
 import CodeView from '@/components/CodeView';
 import { Message, Algorithm, VisualizationStep } from '@/types/AlgorithmTypes';
 import { getAlgorithmByQuery } from '@/lib/algorithm-matcher';
-import { algorithmExamples } from '@/data/algorithm-examples';
+import { algorithmExamples, algorithmLearningTips, algorithmUseCases } from '@/data/algorithm-examples';
 
 const Index = () => {
   const { toast } = useToast();
@@ -31,6 +30,10 @@ const Index = () => {
   const [playing, setPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState('visualization');
+  const [showLearningTips, setShowLearningTips] = useState(false);
+  const [randomTip] = useState(() => {
+    return algorithmLearningTips[Math.floor(Math.random() * algorithmLearningTips.length)];
+  });
 
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -106,7 +109,17 @@ const Index = () => {
     setInput(example);
   };
 
-  // Auto-advance steps when playing
+  const getRelevantUseCase = () => {
+    if (!currentAlgorithm) return null;
+    
+    const algorithmType = currentAlgorithm.name.toLowerCase();
+    const useCase = Object.entries(algorithmUseCases).find(([key]) => 
+      algorithmType.includes(key.toLowerCase())
+    );
+    
+    return useCase ? useCase[1] : null;
+  };
+
   React.useEffect(() => {
     if (!playing || !currentAlgorithm) return;
     
@@ -131,11 +144,20 @@ const Index = () => {
             </div>
             <h1 className="text-xl font-bold tracking-tight">AlgoVision AI</h1>
           </div>
+          
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowLearningTips(!showLearningTips)}
+            className="flex items-center gap-1"
+          >
+            <GraduationCap className="h-4 w-4" />
+            <span>Learning Tips</span>
+          </Button>
         </div>
       </header>
 
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Chat sidebar */}
         <div className="w-full lg:w-1/3 border-r border-border flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map(message => (
@@ -146,6 +168,25 @@ const Index = () => {
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse mx-1"></div>
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse mx-1" style={{ animationDelay: '0.2s' }}></div>
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse mx-1" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            )}
+            
+            {showLearningTips && (
+              <div className="glass-card p-4 my-4 animate-fade-in border-l-4 border-amber-400">
+                <div className="flex items-start">
+                  <Lightbulb className="h-5 w-5 text-amber-400 mr-2 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Learning Tip</h4>
+                    <p className="text-sm text-muted-foreground">{randomTip}</p>
+                  </div>
+                </div>
+                
+                {currentAlgorithm && getRelevantUseCase() && (
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <h4 className="font-medium text-sm mb-1">Real-world Use Case:</h4>
+                    <p className="text-sm text-muted-foreground">{getRelevantUseCase()}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -162,7 +203,7 @@ const Index = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about an algorithm..."
-                className="flex-1"
+                className="flex-1 glass-input"
                 disabled={loading}
               />
               <Button type="submit" disabled={loading || !input.trim()}>
@@ -171,7 +212,10 @@ const Index = () => {
             </form>
 
             <div className="mt-4">
-              <p className="text-sm text-muted-foreground mb-2">Try asking about:</p>
+              <div className="flex items-center mb-2">
+                <BookOpen className="w-4 h-4 text-primary mr-2" />
+                <p className="text-sm text-muted-foreground">Try asking about:</p>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {algorithmExamples.map((example, index) => (
                   <Button 
@@ -179,7 +223,8 @@ const Index = () => {
                     variant="outline" 
                     size="sm" 
                     onClick={() => handleExampleClick(example)}
-                    className="text-xs"
+                    className="text-xs animate-pulse hover:animate-none"
+                    style={{ animationDelay: `${index * 0.1}s`, animationDuration: '3s' }}
                   >
                     {example}
                   </Button>
@@ -189,13 +234,19 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Main content area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {currentAlgorithm ? (
             <>
               <div className="p-4 border-b">
                 <h2 className="text-xl font-bold">{currentAlgorithm.name}</h2>
-                <p className="text-sm text-muted-foreground mt-1">{currentAlgorithm.description}</p>
+                <div className="flex items-center mt-1">
+                  <p className="text-sm text-muted-foreground">{currentAlgorithm.description}</p>
+                  {getRelevantUseCase() && (
+                    <div className="ml-3 flex items-center text-xs px-2 py-0.5 bg-primary/10 rounded-full">
+                      <span className="text-primary">Real-world use: {getRelevantUseCase()}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <Tabs
@@ -205,8 +256,14 @@ const Index = () => {
               >
                 <div className="px-4 border-b">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="visualization">Visualization</TabsTrigger>
-                    <TabsTrigger value="code">Code</TabsTrigger>
+                    <TabsTrigger value="visualization" className="flex items-center gap-1">
+                      <GraduationCap className="h-4 w-4" />
+                      Visualization
+                    </TabsTrigger>
+                    <TabsTrigger value="code" className="flex items-center gap-1">
+                      <Code className="h-4 w-4" />
+                      Code
+                    </TabsTrigger>
                   </TabsList>
                 </div>
 
@@ -287,7 +344,7 @@ const Index = () => {
                           </Button>
                         </div>
                         
-                        <div className="w-8"></div> {/* Spacer for alignment */}
+                        <div className="w-8"></div>
                       </div>
                     </div>
                   )}
@@ -300,16 +357,49 @@ const Index = () => {
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4 animate-pulse">
                 <Code className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Visualize Algorithms & Data Structures</h2>
+              <h2 className="text-2xl font-bold mb-2 gradient-text">Learn Algorithms & Data Structures</h2>
               <p className="text-muted-foreground max-w-md mb-6">
                 Ask a question about an algorithm or data structure to see it visualized step by step with interactive controls.
               </p>
-              <Button onClick={() => handleExampleClick("Show me how binary search works")}>
-                Try an Example
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={() => handleExampleClick("Show me how binary search works")}>
+                  Try Binary Search
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleExampleClick("Visualize bubble sort")}
+                >
+                  Explore Bubble Sort
+                </Button>
+              </div>
+              
+              <div className="mt-8 glass-card p-5 max-w-lg">
+                <div className="flex items-center mb-3">
+                  <Lightbulb className="h-5 w-5 text-amber-400 mr-2" />
+                  <h3 className="font-medium">How to get the most from AlgoVision AI</h3>
+                </div>
+                <ul className="text-sm text-left space-y-2">
+                  <li className="flex items-start">
+                    <span className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-2 mt-0.5">1</span>
+                    <span>Ask about a specific algorithm you want to learn</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-2 mt-0.5">2</span>
+                    <span>Use the interactive controls to step through the visualization</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-2 mt-0.5">3</span>
+                    <span>Read the explanation for each step to understand what's happening</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-2 mt-0.5">4</span>
+                    <span>Switch to the Code tab to see the implementation details</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           )}
         </div>

@@ -34,6 +34,11 @@
     --ring: 250 95% 65%;
 
     --radius: 0.75rem;
+    
+    --algo-node-default: 226 30% 25%;
+    --algo-node-visited: 250 95% 65%;
+    --algo-node-current: 358 73% 59%;
+    --algo-node-highlighted: 150 60% 60%;
   }
 
   .light {
@@ -64,6 +69,11 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 262.1 83.3% 57.8%;
+    
+    --algo-node-default: 220 13% 30%;
+    --algo-node-visited: 262.1 83.3% 57.8%;
+    --algo-node-current: 358 73% 59%;
+    --algo-node-highlighted: 150 60% 60%;
   }
 }
 
@@ -179,4 +189,53 @@
   background-image: linear-gradient(45deg, #9b87f5, #7a42f4, #9b87f5);
   background-size: 200% auto;
   animation: gradient-shift 3s ease infinite;
+}
+
+/* Additional educational styles */
+.highlight-box {
+  @apply bg-primary/10 border-l-4 border-primary p-3 rounded-r-lg my-3;
+}
+
+.key-concept {
+  @apply border-amber-400 bg-amber-400/10;
+}
+
+.tip-box {
+  @apply border-green-400 bg-green-400/10;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+}
+
+.pulse-focus {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Step-by-step guide styles */
+.step-item {
+  @apply flex items-start mb-4;
+}
+
+.step-number {
+  @apply w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm mr-3 flex-shrink-0;
+}
+
+.step-content {
+  @apply flex-1;
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  @apply transition-all duration-300;
+}
+
+.hover-lift:hover {
+  @apply -translate-y-1 shadow-lg;
+}
+
+.interactive-card {
+  @apply transition-all duration-300 hover:bg-card/90 hover:shadow-lg hover:shadow-primary/5 cursor-pointer;
 }
