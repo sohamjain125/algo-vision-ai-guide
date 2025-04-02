@@ -22,15 +22,23 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const formatCode = (code: string) => {
-    // Enhanced syntax highlighting for better readability
-    return code
-      .replace(/\/\/(.*)/g, '<span class="text-gray-500">// $1</span>') // Comments
-      .replace(/\b(const|let|var|function|return|if|else|for|while|of|in|switch|case|break|continue|class|import|export|from|as)\b/g, '<span class="text-pink-400">$1</span>') // Keywords
-      .replace(/(".*?"|'.*?'|`.*?`)/g, '<span class="text-green-400">$1</span>') // Strings
-      .replace(/\b(\d+)\b/g, '<span class="text-amber-400">$1</span>') // Numbers
-      .replace(/\b(Array|Object|String|Number|Boolean|console|Set|Map)\b/g, '<span class="text-cyan-400">$1</span>') // Built-ins
-      .replace(/\b(true|false|null|undefined)\b/g, '<span class="text-purple-400">$1</span>'); // Special values
+  // Parse the code and create React elements for syntax highlighting
+  const renderCodeWithSyntaxHighlighting = (code: string) => {
+    // Replace HTML special characters to prevent issues
+    const escapedCode = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    
+    const highlightedCode = escapedCode
+      .replace(/(\/\/.*)/g, '<span style="color: #6b7280;">$1</span>') // Comments
+      .replace(/\b(const|let|var|function|return|if|else|for|while|of|in|switch|case|break|continue|class|import|export|from|as)\b/g, '<span style="color: #ec4899;">$1</span>') // Keywords
+      .replace(/(".*?"|'.*?'|`.*?`)/g, '<span style="color: #4ade80;">$1</span>') // Strings
+      .replace(/\b(\d+)\b/g, '<span style="color: #fbbf24;">$1</span>') // Numbers
+      .replace(/\b(Array|Object|String|Number|Boolean|console|Set|Map)\b/g, '<span style="color: #06b6d4;">$1</span>') // Built-ins
+      .replace(/\b(true|false|null|undefined)\b/g, '<span style="color: #a855f7;">$1</span>'); // Special values
+    
+    return <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
   };
 
   return (
@@ -108,7 +116,7 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
             <CardContent className="p-0">
               <div className="bg-muted rounded-b-md overflow-auto max-h-[500px] p-4">
                 <pre className="text-sm font-mono">
-                  <code dangerouslySetInnerHTML={{ __html: formatCode(algorithm.code) }} />
+                  {renderCodeWithSyntaxHighlighting(algorithm.code)}
                 </pre>
               </div>
             </CardContent>
