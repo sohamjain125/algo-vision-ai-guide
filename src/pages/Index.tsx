@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,12 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon, BookOpen, Lightbulb, GraduationCap } from "lucide-react";
+import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon, BookOpen, Lightbulb, GraduationCap, BarChart, FileText } from "lucide-react";
 import ChatMessage from '@/components/ChatMessage';
 import AlgorithmVisualizer from '@/components/AlgorithmVisualizer';
 import CodeView from '@/components/CodeView';
+import AlgorithmCheatsheet from '@/components/AlgorithmCheatsheet';
+import LearningResources from '@/components/LearningResources';
+import AlgorithmComparison from '@/components/AlgorithmComparison';
 import { Message, Algorithm, VisualizationStep } from '@/types/AlgorithmTypes';
-import { getAlgorithmByQuery } from '@/lib/algorithm-matcher';
+import { getAlgorithmByQuery, getAlgorithmsForComparison } from '@/lib/algorithm-matcher';
 import { algorithmExamples, algorithmLearningTips, algorithmUseCases } from '@/data/algorithm-examples';
 
 const Index = () => {
@@ -31,9 +35,12 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState('visualization');
   const [showLearningTips, setShowLearningTips] = useState(false);
+  const [showResources, setShowResources] = useState(false);
   const [randomTip] = useState(() => {
     return algorithmLearningTips[Math.floor(Math.random() * algorithmLearningTips.length)];
   });
+  const [comparisonAlgorithms, setComparisonAlgorithms] = useState<Algorithm[]>([]);
+  const [isComparisonMode, setIsComparisonMode] = useState(false);
 
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -48,30 +55,68 @@ const Index = () => {
     setInput('');
     setLoading(true);
 
+    // Check if this is a comparison query
+    const isComparisonQuery = input.toLowerCase().includes('compare') || 
+                             input.toLowerCase().includes('vs') || 
+                             input.toLowerCase().includes('versus') || 
+                             input.toLowerCase().includes('difference');
+
     // Simulate AI processing
     setTimeout(() => {
       try {
-        const matchedAlgorithm = getAlgorithmByQuery(input);
-        
-        if (matchedAlgorithm) {
-          setCurrentAlgorithm(matchedAlgorithm);
-          setCurrentStep(0);
+        if (isComparisonQuery) {
+          // Handle comparison query
+          const algorithmsToCompare = getAlgorithmsForComparison(input);
           
-          const responseMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'system',
-            content: `I'll show you how ${matchedAlgorithm.name} works. You can use the controls below to step through the visualization.`
-          };
-          
-          setMessages(prev => [...prev, responseMessage]);
+          if (algorithmsToCompare.length >= 2) {
+            setCurrentAlgorithm(algorithmsToCompare[0]);
+            setComparisonAlgorithms(algorithmsToCompare);
+            setIsComparisonMode(true);
+            setCurrentStep(0);
+            setActiveTab('comparison');
+            
+            const responseMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: 'system',
+              content: `I'll compare ${algorithmsToCompare.map(a => a.name).join(' and ')} for you. Check out the comparison tab for details.`
+            };
+            
+            setMessages(prev => [...prev, responseMessage]);
+          } else {
+            const errorMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: 'system',
+              content: "I couldn't identify multiple algorithms to compare. Try specifying two algorithms, like 'Compare bubble sort and quick sort'."
+            };
+            
+            setMessages(prev => [...prev, errorMessage]);
+          }
         } else {
-          const errorMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'system',
-            content: "I'm sorry, I couldn't identify an algorithm from your request. Try asking about a specific algorithm like 'Show me binary search' or 'How does bubble sort work?'"
-          };
+          // Handle regular algorithm query
+          const matchedAlgorithm = getAlgorithmByQuery(input);
           
-          setMessages(prev => [...prev, errorMessage]);
+          if (matchedAlgorithm) {
+            setCurrentAlgorithm(matchedAlgorithm);
+            setIsComparisonMode(false);
+            setCurrentStep(0);
+            setActiveTab('visualization');
+            
+            const responseMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: 'system',
+              content: `I'll show you how ${matchedAlgorithm.name} works. You can use the controls below to step through the visualization.`
+            };
+            
+            setMessages(prev => [...prev, responseMessage]);
+          } else {
+            const errorMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: 'system',
+              content: "I'm sorry, I couldn't identify an algorithm from your request. Try asking about a specific algorithm like 'Show me binary search' or 'How does bubble sort work?'"
+            };
+            
+            setMessages(prev => [...prev, errorMessage]);
+          }
         }
       } catch (error) {
         console.error(error);
@@ -145,15 +190,27 @@ const Index = () => {
             <h1 className="text-xl font-bold tracking-tight">AlgoVision AI</h1>
           </div>
           
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setShowLearningTips(!showLearningTips)}
-            className="flex items-center gap-1"
-          >
-            <GraduationCap className="h-4 w-4" />
-            <span>Learning Tips</span>
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowResources(!showResources)}
+              className="flex items-center gap-1"
+            >
+              <BookOpen className="h-4 w-4" />
+              <span>Learning Resources</span>
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowLearningTips(!showLearningTips)}
+              className="flex items-center gap-1"
+            >
+              <GraduationCap className="h-4 w-4" />
+              <span>Learning Tips</span>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -189,6 +246,8 @@ const Index = () => {
                 )}
               </div>
             )}
+            
+            {showResources && <LearningResources />}
           </div>
 
           <div className="p-4 border-t">
@@ -212,9 +271,19 @@ const Index = () => {
             </form>
 
             <div className="mt-4">
-              <div className="flex items-center mb-2">
-                <BookOpen className="w-4 h-4 text-primary mr-2" />
-                <p className="text-sm text-muted-foreground">Try asking about:</p>
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center">
+                  <BookOpen className="w-4 h-4 text-primary mr-2" />
+                  <p className="text-sm text-muted-foreground">Try asking about:</p>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowResources(true)}
+                  className="text-xs"
+                >
+                  View All Resources
+                </Button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {algorithmExamples.map((example, index) => (
@@ -223,12 +292,24 @@ const Index = () => {
                     variant="outline" 
                     size="sm" 
                     onClick={() => handleExampleClick(example)}
-                    className="text-xs animate-pulse hover:animate-none"
-                    style={{ animationDelay: `${index * 0.1}s`, animationDuration: '3s' }}
+                    className="text-xs hover:bg-primary/10 transition-colors"
                   >
                     {example}
                   </Button>
                 ))}
+              </div>
+              
+              <div className="mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleExampleClick("Compare bubble sort vs quick sort")}
+                  className="text-xs w-full hover:bg-primary/10 flex items-center justify-center gap-1 animate-pulse"
+                  style={{ animationDuration: '3s' }}
+                >
+                  <BarChart className="h-3.5 w-3.5" />
+                  Compare Algorithms (e.g. Bubble Sort vs Quick Sort)
+                </Button>
               </div>
             </div>
           </div>
@@ -255,7 +336,7 @@ const Index = () => {
                 className="flex-1 flex flex-col overflow-hidden"
               >
                 <div className="px-4 border-b">
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="visualization" className="flex items-center gap-1">
                       <GraduationCap className="h-4 w-4" />
                       Visualization
@@ -263,6 +344,14 @@ const Index = () => {
                     <TabsTrigger value="code" className="flex items-center gap-1">
                       <Code className="h-4 w-4" />
                       Code
+                    </TabsTrigger>
+                    <TabsTrigger value="comparison" className="flex items-center gap-1" disabled={!isComparisonMode}>
+                      <BarChart className="h-4 w-4" />
+                      Comparison
+                    </TabsTrigger>
+                    <TabsTrigger value="cheatsheet" className="flex items-center gap-1">
+                      <FileText className="h-4 w-4" />
+                      Cheatsheet
                     </TabsTrigger>
                   </TabsList>
                 </div>
@@ -353,6 +442,14 @@ const Index = () => {
                 <TabsContent value="code" className="flex-1 overflow-auto p-4">
                   <CodeView algorithm={currentAlgorithm} />
                 </TabsContent>
+
+                <TabsContent value="comparison" className="flex-1 overflow-auto p-4">
+                  <AlgorithmComparison algorithms={comparisonAlgorithms} />
+                </TabsContent>
+
+                <TabsContent value="cheatsheet" className="flex-1 overflow-auto p-4">
+                  <AlgorithmCheatsheet />
+                </TabsContent>
               </Tabs>
             </>
           ) : (
@@ -398,7 +495,21 @@ const Index = () => {
                     <span className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-2 mt-0.5">4</span>
                     <span>Switch to the Code tab to see the implementation details</span>
                   </li>
+                  <li className="flex items-start">
+                    <span className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center mr-2 mt-0.5">5</span>
+                    <span>Compare algorithms to understand their differences</span>
+                  </li>
                 </ul>
+                
+                <div className="mt-4 pt-4 border-t border-border">
+                  <Button 
+                    variant="secondary" 
+                    className="w-full" 
+                    onClick={() => setShowResources(true)}
+                  >
+                    Explore Learning Resources
+                  </Button>
+                </div>
               </div>
             </div>
           )}
