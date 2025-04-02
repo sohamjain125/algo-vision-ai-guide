@@ -23,13 +23,14 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
   };
 
   const formatCode = (code: string) => {
-    // Simple syntax highlighting by adding spans with classes for different code parts
+    // Enhanced syntax highlighting for better readability
     return code
       .replace(/\/\/(.*)/g, '<span class="text-gray-500">// $1</span>') // Comments
-      .replace(/\b(const|let|var|function|return|if|else|for|while|switch|case|break|continue|class|import|export|from|as)\b/g, '<span class="text-pink-400">$1</span>') // Keywords
+      .replace(/\b(const|let|var|function|return|if|else|for|while|of|in|switch|case|break|continue|class|import|export|from|as)\b/g, '<span class="text-pink-400">$1</span>') // Keywords
       .replace(/(".*?"|'.*?'|`.*?`)/g, '<span class="text-green-400">$1</span>') // Strings
       .replace(/\b(\d+)\b/g, '<span class="text-amber-400">$1</span>') // Numbers
-      .replace(/\b(Array|Object|String|Number|Boolean|console)\b/g, '<span class="text-cyan-400">$1</span>'); // Built-ins
+      .replace(/\b(Array|Object|String|Number|Boolean|console|Set|Map)\b/g, '<span class="text-cyan-400">$1</span>') // Built-ins
+      .replace(/\b(true|false|null|undefined)\b/g, '<span class="text-purple-400">$1</span>'); // Special values
   };
 
   return (
