@@ -1,4 +1,3 @@
-
 import { Algorithm } from '@/types/AlgorithmTypes';
 import { binarySearch } from '@/data/algorithms/binary-search';
 import { bubbleSort } from '@/data/algorithms/bubble-sort';
@@ -8,6 +7,10 @@ import { breadthFirstSearch } from '@/data/algorithms/breadth-first-search';
 import { heapSort } from '@/data/algorithms/heap-sort';
 import { mergeSort } from '@/data/algorithms/merge-sort';
 import { linkedList } from '@/data/algorithms/linked-list';
+import { depthFirstSearch } from '@/data/algorithms/depth-first-search';
+import { dijkstra } from '@/data/algorithms/dijkstra';
+import { insertionSort } from '@/data/algorithms/insertion-sort';
+import { selectionSort } from '@/data/algorithms/selection-sort';
 
 // All available algorithms
 const algorithms: Algorithm[] = [
@@ -18,7 +21,11 @@ const algorithms: Algorithm[] = [
   breadthFirstSearch,
   heapSort,
   mergeSort,
-  linkedList
+  linkedList,
+  depthFirstSearch,
+  dijkstra,
+  insertionSort,
+  selectionSort
 ];
 
 // Keywords associated with each algorithm
@@ -30,7 +37,11 @@ const algorithmKeywords: Record<string, string[]> = {
   'breadth-first-search': ['bfs', 'breadth first search', 'level order', 'graph traversal', 'breadth', 'width-first', 'level traversal', 'queue-based search'],
   'heap-sort': ['heap sort', 'heapsort', 'heap', 'binary heap', 'max heap', 'priority queue', 'heap-based sorting', 'tree sort'],
   'merge-sort': ['merge sort', 'mergesort', 'merge', 'divide and conquer', 'stable sort', 'recursive sorting', 'divide-merge', 'n log n sort'],
-  'linked-list': ['linked list', 'list', 'node', 'linked', 'singly linked', 'chain', 'sequential access', 'node chain', 'pointer-based']
+  'linked-list': ['linked list', 'list', 'node', 'linked', 'singly linked', 'chain', 'sequential access', 'node chain', 'pointer-based'],
+  'depth-first-search': ['dfs', 'depth first search', 'graph traversal', 'depth', 'recursive search', 'backtracking', 'stack-based search', 'deep search'],
+  'dijkstra': ['dijkstra', 'shortest path', 'graph algorithm', 'path finding', 'weighted graph', 'greedy algorithm', 'distance calculation'],
+  'insertion-sort': ['insertion sort', 'insertion', 'sorting', 'card sorting', 'in-place sort', 'online algorithm', 'incremental sort'],
+  'selection-sort': ['selection sort', 'selection', 'sorting', 'position-based sort', 'find minimum', 'simplistic sort', 'comparison sort']
 };
 
 // Algorithm comparison keywords
@@ -121,18 +132,35 @@ function handleComparisonQuery(query: string): Algorithm | null {
 }
 
 /**
- * Simple fuzzy matching for handling misspellings
+ * Simple fuzzy matching for handling misspellings with improved matching
  */
 function fuzzyMatch(text: string, pattern: string): boolean {
   // Allow for some misspellings by checking if most characters are present
   let matches = 0;
-  const threshold = pattern.length * 0.7; // 70% of characters must match
+  const threshold = pattern.length * 0.65; // Lowered threshold for better matching
   
-  for (const char of pattern) {
-    if (text.includes(char)) {
+  // Count consecutive character matches for better accuracy
+  let consecutiveMatches = 0;
+  let lastMatchIndex = -1;
+  
+  for (let i = 0; i < pattern.length; i++) {
+    const char = pattern[i];
+    const charIndex = text.indexOf(char, lastMatchIndex + 1);
+    
+    if (charIndex > -1) {
       matches++;
+      
+      // Check for consecutive matches
+      if (lastMatchIndex > -1 && charIndex === lastMatchIndex + 1) {
+        consecutiveMatches++;
+      }
+      
+      lastMatchIndex = charIndex;
     }
   }
+  
+  // Give more weight to consecutive matches
+  matches += Math.min(consecutiveMatches, pattern.length / 2);
   
   return matches >= threshold;
 }

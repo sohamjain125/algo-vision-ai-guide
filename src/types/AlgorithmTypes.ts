@@ -51,6 +51,7 @@ export interface Algorithm {
   timeComplexity: string;
   spaceComplexity: string;
   code: string;
+  pseudocode?: string;
   steps: VisualizationStep[];
 }
 
