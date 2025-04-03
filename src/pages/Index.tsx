@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon, BookOpen, Lightbulb, GraduationCap, BarChart, FileText } from "lucide-react";
+import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon, BookOpen, Lightbulb, GraduationCap, BarChart, FileText, Terminal } from "lucide-react";
 import ChatMessage from '@/components/ChatMessage';
 import AlgorithmVisualizer from '@/components/AlgorithmVisualizer';
 import CodeView from '@/components/CodeView';
+import CodePlayground from '@/components/CodePlayground';
 import AlgorithmCheatsheet from '@/components/AlgorithmCheatsheet';
 import LearningResources from '@/components/LearningResources';
 import AlgorithmComparison from '@/components/AlgorithmComparison';
@@ -336,7 +337,7 @@ const Index = () => {
                 className="flex-1 flex flex-col overflow-hidden"
               >
                 <div className="px-4 border-b">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="visualization" className="flex items-center gap-1">
                       <GraduationCap className="h-4 w-4" />
                       Visualization
@@ -344,6 +345,10 @@ const Index = () => {
                     <TabsTrigger value="code" className="flex items-center gap-1">
                       <Code className="h-4 w-4" />
                       Code
+                    </TabsTrigger>
+                    <TabsTrigger value="playground" className="flex items-center gap-1">
+                      <Terminal className="h-4 w-4" />
+                      Playground
                     </TabsTrigger>
                     <TabsTrigger value="comparison" className="flex items-center gap-1" disabled={!isComparisonMode}>
                       <BarChart className="h-4 w-4" />
@@ -441,6 +446,10 @@ const Index = () => {
 
                 <TabsContent value="code" className="flex-1 overflow-auto p-4">
                   <CodeView algorithm={currentAlgorithm} />
+                </TabsContent>
+
+                <TabsContent value="playground" className="flex-1 overflow-auto p-4">
+                  <CodePlayground algorithm={currentAlgorithm} />
                 </TabsContent>
 
                 <TabsContent value="comparison" className="flex-1 overflow-auto p-4">

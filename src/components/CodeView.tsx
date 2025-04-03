@@ -4,8 +4,10 @@ import { Algorithm } from '@/types/AlgorithmTypes';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Info, Code, FileText, Copy, Check, FileCode, FileJson } from 'lucide-react';
+import { Info, Code, FileText, Copy, Check, FileCode, FileJson, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { vs, vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 interface CodeViewProps {
   algorithm: Algorithm;
@@ -15,30 +17,12 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'implementation' | 'pseudocode' | 'complexity'>('implementation');
+  const [darkTheme, setDarkTheme] = useState(true);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(algorithm.code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Parse the code and create React elements for syntax highlighting
-  const renderCodeWithSyntaxHighlighting = (code: string) => {
-    // Replace HTML special characters to prevent issues
-    const escapedCode = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    
-    const highlightedCode = escapedCode
-      .replace(/(\/\/.*)/g, '<span style="color: #6b7280;">$1</span>') // Comments
-      .replace(/\b(const|let|var|function|return|if|else|for|while|of|in|switch|case|break|continue|class|import|export|from|as)\b/g, '<span style="color: #ec4899;">$1</span>') // Keywords
-      .replace(/(".*?"|'.*?'|`.*?`)/g, '<span style="color: #4ade80;">$1</span>') // Strings
-      .replace(/\b(\d+)\b/g, '<span style="color: #fbbf24;">$1</span>') // Numbers
-      .replace(/\b(Array|Object|String|Number|Boolean|console|Set|Map)\b/g, '<span style="color: #06b6d4;">$1</span>') // Built-ins
-      .replace(/\b(true|false|null|undefined)\b/g, '<span style="color: #a855f7;">$1</span>'); // Special values
-    
-    return <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
   };
 
   return (
@@ -69,6 +53,25 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
             >
               <Info className="h-4 w-4 mr-1" />
               {showExplanation ? "Hide Explanation" : "Show Explanation"}
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDarkTheme(!darkTheme)}
+              className="flex items-center space-x-1"
+            >
+              {darkTheme ? (
+                <>
+                  <Sun className="h-4 w-4 mr-1" />
+                  <span>Light Theme</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="h-4 w-4 mr-1" />
+                  <span>Dark Theme</span>
+                </>
+              )}
             </Button>
             
             <Button
@@ -114,10 +117,20 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="bg-muted rounded-b-md overflow-auto max-h-[500px] p-4">
-                <pre className="text-sm font-mono">
-                  {renderCodeWithSyntaxHighlighting(algorithm.code)}
-                </pre>
+              <div className="bg-muted rounded-b-md overflow-auto max-h-[500px]">
+                <SyntaxHighlighter 
+                  language="javascript" 
+                  style={darkTheme ? vs2015 : vs}
+                  showLineNumbers
+                  customStyle={{ 
+                    margin: 0,
+                    padding: '1rem',
+                    borderRadius: '0 0 0.5rem 0.5rem',
+                    background: darkTheme ? '#1e1e1e' : '#f8f8f8' 
+                  }}
+                >
+                  {algorithm.code}
+                </SyntaxHighlighter>
               </div>
             </CardContent>
           </Card>
