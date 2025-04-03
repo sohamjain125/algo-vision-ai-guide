@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon, BookOpen, Lightbulb, GraduationCap, BarChart, FileText, Terminal } from "lucide-react";
+import { SearchIcon, Code, ArrowLeftIcon, ArrowRightIcon, RefreshCwIcon, PlayIcon, PauseIcon, BookOpen, Lightbulb, GraduationCap, BarChart, FileText, Terminal, UserPlus } from "lucide-react";
+import { Link } from 'react-router-dom';
 import ChatMessage from '@/components/ChatMessage';
 import AlgorithmVisualizer from '@/components/AlgorithmVisualizer';
 import CodeView from '@/components/CodeView';
@@ -15,12 +16,17 @@ import CodePlayground from '@/components/CodePlayground';
 import AlgorithmCheatsheet from '@/components/AlgorithmCheatsheet';
 import LearningResources from '@/components/LearningResources';
 import AlgorithmComparison from '@/components/AlgorithmComparison';
+import AlgorithmProgress from '@/components/AlgorithmProgress';
+import UserProfile from '@/components/UserProfile';
 import { Message, Algorithm, VisualizationStep } from '@/types/AlgorithmTypes';
 import { getAlgorithmByQuery, getAlgorithmsForComparison } from '@/lib/algorithm-matcher';
 import { algorithmExamples, algorithmLearningTips, algorithmUseCases } from '@/data/algorithm-examples';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAlgorithmProgress } from '@/hooks/useAlgorithmProgress';
 
 const Index = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -42,6 +48,16 @@ const Index = () => {
   });
   const [comparisonAlgorithms, setComparisonAlgorithms] = useState<Algorithm[]>([]);
   const [isComparisonMode, setIsComparisonMode] = useState(false);
+  
+  // Use the algorithm progress hook
+  const { updateViewTime } = useAlgorithmProgress(currentAlgorithm?.id);
+
+  // Update view time when algorithm changes
+  useEffect(() => {
+    if (user && currentAlgorithm) {
+      updateViewTime(currentAlgorithm.id);
+    }
+  }, [user, currentAlgorithm]);
 
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -192,6 +208,22 @@ const Index = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            {user ? (
+              <UserProfile />
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild
+                className="flex items-center gap-1"
+              >
+                <Link to="/auth">
+                  <UserPlus className="h-4 w-4" />
+                  <span>Sign In</span>
+                </Link>
+              </Button>
+            )}
+            
             <Button 
               variant="ghost" 
               size="sm"
@@ -367,6 +399,8 @@ const Index = () => {
                       algorithm={currentAlgorithm}
                       currentStep={currentStep}
                     />
+                    
+                    {user && <AlgorithmProgress algorithm={currentAlgorithm} />}
                   </div>
 
                   {currentAlgorithm.steps.length > 0 && (
@@ -446,10 +480,12 @@ const Index = () => {
 
                 <TabsContent value="code" className="flex-1 overflow-auto p-4">
                   <CodeView algorithm={currentAlgorithm} />
+                  {user && <AlgorithmProgress algorithm={currentAlgorithm} />}
                 </TabsContent>
 
                 <TabsContent value="playground" className="flex-1 overflow-auto p-4">
                   <CodePlayground algorithm={currentAlgorithm} />
+                  {user && <AlgorithmProgress algorithm={currentAlgorithm} />}
                 </TabsContent>
 
                 <TabsContent value="comparison" className="flex-1 overflow-auto p-4">
