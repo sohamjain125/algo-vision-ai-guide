@@ -118,19 +118,22 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
             </CardHeader>
             <CardContent className="p-0">
               <div className="bg-muted rounded-b-md overflow-auto max-h-[500px]">
-                <SyntaxHighlighter 
-                  language="javascript" 
-                  style={darkTheme ? vs2015 : vs}
-                  showLineNumbers
-                  customStyle={{ 
-                    margin: 0,
-                    padding: '1rem',
-                    borderRadius: '0 0 0.5rem 0.5rem',
-                    background: darkTheme ? '#1e1e1e' : '#f8f8f8' 
-                  }}
-                >
-                  {algorithm.code}
-                </SyntaxHighlighter>
+                {algorithm.code && (
+                  <SyntaxHighlighter
+                    language="javascript"
+                    style={darkTheme ? vs2015 : vs}
+                    showLineNumbers
+                    wrapLines
+                    customStyle={{
+                      margin: 0,
+                      padding: '1rem',
+                      borderRadius: '0 0 0.5rem 0.5rem',
+                      background: darkTheme ? '#1e1e1e' : '#f8f8f8',
+                    }}
+                  >
+                    {algorithm.code}
+                  </SyntaxHighlighter>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -145,7 +148,7 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="bg-muted/50 rounded-md p-4 font-mono text-sm">
+              <div className="bg-muted/50 rounded-md p-4 font-mono text-sm whitespace-pre-wrap">
                 {algorithm.pseudocode || "Pseudocode not available for this algorithm."}
               </div>
             </CardContent>

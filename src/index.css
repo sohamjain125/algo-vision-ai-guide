@@ -132,6 +132,22 @@
   @apply text-blue-400;
 }
 
+/* Animation classes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
 /* Animation classes for algorithm visualization */
 .node-enter {
   @apply transition-all duration-300 ease-in-out;
@@ -238,4 +254,19 @@
 
 .interactive-card {
   @apply transition-all duration-300 hover:bg-card/90 hover:shadow-lg hover:shadow-primary/5 cursor-pointer;
+}
+
+/* Code syntax highlighting styles */
+.code-editor pre {
+  @apply font-mono text-sm p-0 m-0;
+  white-space: pre-wrap;
+}
+
+.code-output {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
 }
