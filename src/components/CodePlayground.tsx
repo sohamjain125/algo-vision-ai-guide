@@ -36,23 +36,31 @@ const CodePlayground: React.FC<CodePlaygroundProps> = ({ algorithm }) => {
       // Override console.log to capture output
       console.log = (...args) => {
         logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' '));
+        originalConsoleLog(...args); // Still log to browser console for debugging
       };
       
       // Create a function from the code string and execute it
-      const safeEval = new Function('algorithm', `
+      const functionName = algorithm.id.replace(/-/g, '');
+      
+      // Safely wrap execution in try/catch
+      const safeEval = new Function(`
         try {
           ${code}
-          // Add a default test case if the algorithm function exists
-          if (typeof ${algorithm.id.replace(/-/g, '')} === 'function') {
+          
+          // Check if the algorithm function exists and run a test case
+          if (typeof ${functionName} === 'function') {
             console.log('Testing with sample input:');
             ${getTestCaseForAlgorithm(algorithm.id)}
+          } else {
+            console.log('Function ${functionName}() was not found. Make sure your code defines this function.');
           }
         } catch (error) {
           console.log('Error:', error.message);
         }
+        return 'execution complete';
       `);
       
-      safeEval(algorithm);
+      safeEval();
       
       // Restore original console.log
       console.log = originalConsoleLog;
@@ -62,7 +70,7 @@ const CodePlayground: React.FC<CodePlaygroundProps> = ({ algorithm }) => {
       if (logs.some(log => log.includes('Error:'))) {
         toast({
           title: "Execution Error",
-          description: "There was an error running your code. See the console for details.",
+          description: "There was an error running your code. See the output for details.",
           variant: "destructive"
         });
       } else if (logs.length > 0) {
@@ -75,12 +83,12 @@ const CodePlayground: React.FC<CodePlaygroundProps> = ({ algorithm }) => {
       setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
       toast({
         title: "Execution Error",
-        description: "There was an error running your code. See the console for details.",
+        description: "There was an error running your code. See the output for details.",
         variant: "destructive"
       });
+    } finally {
+      setIsRunning(false);
     }
-    
-    setIsRunning(false);
   };
   
   const resetCode = () => {
@@ -236,10 +244,15 @@ function getTestCaseForAlgorithm(algorithmId: string): string {
         quicksort(arrCopy, 0, arrCopy.length - 1);
         console.log('Sorted array:', arrCopy);
       `;
+    case 'binary-search-tree':
+      return `
+        console.log('Creating binary search tree with [10, 5, 15, 2, 7, 12, 20]');
+        console.log('Please check the visualization tab to see the tree structure');
+      `;
     default:
       return `
-        console.log('Sample test case for ${algorithmId} could be added here');
-        // Try your own test cases!
+        console.log('Running test for ${algorithmId.replace(/-/g, ' ')}');
+        // You can modify this code to test your implementation
       `;
   }
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Algorithm } from '@/types/AlgorithmTypes';
 import { Button } from '@/components/ui/button';
@@ -131,7 +130,7 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
                       background: darkTheme ? '#1e1e1e' : '#f8f8f8',
                     }}
                   >
-                    {algorithm.code}
+                    {algorithm.code || '// No implementation available'}
                   </SyntaxHighlighter>
                 )}
               </div>
@@ -206,7 +205,6 @@ const CodeView: React.FC<CodeViewProps> = ({ algorithm }) => {
   );
 };
 
-// Helper function to provide complexity explanations
 function getComplexityExplanation(complexity: string): string {
   if (complexity.includes('O(1)')) {
     return 'The algorithm takes the same amount of time/space regardless of input size.';
@@ -225,7 +223,6 @@ function getComplexityExplanation(complexity: string): string {
   }
 }
 
-// Helper function to provide use cases based on algorithm ID
 function getAlgorithmUseCases(algorithmId: string): string[] {
   switch (algorithmId) {
     case 'binary-search':
