@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Algorithm } from '@/types/AlgorithmTypes';
 import { Button } from '@/components/ui/button';
@@ -40,20 +39,24 @@ const CodePlayground: React.FC<CodePlaygroundProps> = ({ algorithm }) => {
       };
       
       // Create a function from the code string and execute it
-      const functionName = algorithm.id.replace(/-/g, '');
+      // Handle different function naming conventions based on algorithm
+      const functionNames = getFunctionNamesForAlgorithm(algorithm.id);
       
       // Safely wrap execution in try/catch
       const safeEval = new Function(`
         try {
           ${code}
           
-          // Check if the algorithm function exists and run a test case
-          if (typeof ${functionName} === 'function') {
-            console.log('Testing with sample input:');
-            ${getTestCaseForAlgorithm(algorithm.id)}
-          } else {
-            console.log('Function ${functionName}() was not found. Make sure your code defines this function.');
-          }
+          // Check if any of the algorithm functions exist and run a test case
+          ${functionNames.map(name => `
+          if (typeof ${name} === 'function') {
+            console.log('Testing with function ${name}():');
+            ${getTestCaseForAlgorithm(algorithm.id, name)}
+            return;
+          }`).join('\n')}
+          
+          // If we reach here, none of the expected functions were found
+          console.log('Function ${functionNames[0]}() or alternative function names were not found. Make sure your code defines one of these functions: ${functionNames.join(', ')}');
         } catch (error) {
           console.log('Error:', error.message);
         }
@@ -219,8 +222,40 @@ const CodePlayground: React.FC<CodePlaygroundProps> = ({ algorithm }) => {
   );
 };
 
+// Helper function to get possible function names for specific algorithms
+function getFunctionNamesForAlgorithm(algorithmId: string): string[] {
+  switch (algorithmId) {
+    case 'binary-search':
+      return ['binarysearch', 'binarySearch', 'binary_search'];
+    case 'bubble-sort':
+      return ['bubblesort', 'bubbleSort', 'bubble_sort', 'bubbleSort'];
+    case 'quick-sort':
+      return ['quicksort', 'quickSort', 'quick_sort'];
+    case 'insertion-sort':
+      return ['insertionsort', 'insertionSort', 'insertion_sort'];
+    case 'selection-sort':
+      return ['selectionsort', 'selectionSort', 'selection_sort'];
+    case 'merge-sort':
+      return ['mergesort', 'mergeSort', 'merge_sort'];
+    case 'heap-sort':
+      return ['heapsort', 'heapSort', 'heap_sort'];
+    case 'binary-search-tree':
+      return ['bst', 'BinarySearchTree', 'createBST', 'binarySearchTree'];
+    default:
+      // Default to camelCase, snake_case and lowercase versions as fallbacks
+      const baseName = algorithmId.replace(/-/g, '');
+      const camelCase = algorithmId.split('-').map((word, i) => 
+        i === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+      ).join('');
+      const snake_case = algorithmId.replace(/-/g, '_');
+      return [baseName, camelCase, snake_case];
+  }
+}
+
 // Helper function to get test cases for specific algorithms
-function getTestCaseForAlgorithm(algorithmId: string): string {
+function getTestCaseForAlgorithm(algorithmId: string, functionName: string = ''): string {
+  const fnName = functionName || algorithmId.replace(/-/g, '');
+  
   switch (algorithmId) {
     case 'binary-search':
       return `
@@ -228,20 +263,20 @@ function getTestCaseForAlgorithm(algorithmId: string): string {
         const target = 7;
         console.log('Array:', arr);
         console.log('Target:', target);
-        console.log('Result:', binarysearch(arr, target));
+        console.log('Result:', ${fnName}(arr, target));
       `;
     case 'bubble-sort':
       return `
         const arr = [64, 34, 25, 12, 22, 11, 90];
         console.log('Original array:', arr);
-        console.log('Sorted array:', bubblesort([...arr]));
+        console.log('Sorted array:', ${fnName}([...arr]));
       `;
     case 'quick-sort':
       return `
         const arr = [64, 34, 25, 12, 22, 11, 90];
         console.log('Original array:', arr);
         const arrCopy = [...arr];
-        quicksort(arrCopy, 0, arrCopy.length - 1);
+        ${fnName}(arrCopy, 0, arrCopy.length - 1);
         console.log('Sorted array:', arrCopy);
       `;
     case 'binary-search-tree':
@@ -269,7 +304,7 @@ console.log(\`Found \${target} at index \${result}\`);`;
     case 'bubble-sort':
       return `// Sort an array
 const arr = [64, 34, 25, 12, 22, 11, 90];
-const sortedArray = bubblesort([...arr]);
+const sortedArray = bubbleSort([...arr]);
 console.log('Sorted array:', sortedArray);`;
     default:
       return `// Example for ${algorithmId.replace(/-/g, ' ')}

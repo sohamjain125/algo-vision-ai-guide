@@ -1,4 +1,3 @@
-
 import { Algorithm, ArrayElement } from '@/types/AlgorithmTypes';
 
 export const bubbleSort: Algorithm = {
